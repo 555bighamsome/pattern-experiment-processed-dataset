@@ -1,0 +1,10 @@
+{
+  "input_file": "experiment_data_v2 (1).json",
+  "n_participants": 30,
+  "n_trials_rows": 420,
+  "n_steps_rows": 1649,
+  "n_helpers_rows": 4713,
+  "n_helper_definitions": 486,
+  "n_solution_sequences": 420,
+  "note": "solution_sequences.csv keeps symbolic programs; helper_definitions.csv tracks helper macro expansions."
+}
