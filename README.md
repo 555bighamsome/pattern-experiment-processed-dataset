@@ -1,121 +1,255 @@
-# Pattern Experiment — Processed Dataset Release
+# Pattern Experiment — Processed Dataset
 
-This folder contains the **share-ready processed dataset** for the human experiment.
-The package is intentionally data-only (no bundled analysis scripts).
+Processed behavioral data from a pattern-construction experiment (30 participants × 14 trials).
+Participants construct 10×10 binary grid patterns by composing primitive operations and reusable **helpers** (saved sub-programs).
 
-## 1) Files Included in This Release
+---
 
-All files are under `data/`:
+## 1) Repository Structure
 
-- `participants.csv` — participant-level summary
-- `trials.csv` — trial-level records (`participant × trial`)
-- `steps.csv` — step-level process log (one row per construction step)
-- `helpers_actions.csv` — helper add/use action log
-- `helper_definitions.csv` — helper macro definition and source tracing
-- `solution_sequences.csv` — compact per-trial operation/symbolic sequence
-- `key_metrics.csv` — summary metrics by pattern and trial order
-- `dataset_metadata.json` — build metadata and row counts
+```
+data/
+  programs_and_helpers.json   ← structured per-participant per-trial programs & helper libraries
+  programs_and_helpers.csv    ← flat CSV version (subset of fields)
+  participants.csv            ← participant-level summary
+  trials.csv                  ← trial-level records (participant × trial)
+  steps.csv                   ← step-level process log (one row per construction step)
+  helpers_actions.csv         ← helper add/use action log
+  helper_definitions.csv      ← helper macro definitions and source tracing
+  solution_sequences.csv      ← compact per-trial operation/symbolic sequence
+  key_metrics.csv             ← summary metrics by pattern and trial order
+  dataset_metadata.json       ← build metadata and row counts
+plot_all_participants_v2.py   ← visualization script (generates per-participant PNG figures)
+```
 
-Current metadata snapshot (`dataset_metadata.json`):
+**30 participants**, **420 trials** (30 × 14), **1649 steps**, **486 helper definitions**.
 
-- `n_participants`: 30
-- `n_trials_rows`: 420
-- `n_steps_rows`: 1649
-- `n_helpers_rows`: 4713
-- `n_helper_definitions`: 486
-- `n_solution_sequences`: 420
+---
 
-## 2) Intended Use
+## 2) Quick Start: `programs_and_helpers.json`
 
-- Behavioral analysis at participant/trial/step level
-- Helper creation/use analysis
-- Solution-sequence comparison and clustering
-- Reproduction of human-data analyses from processed tables
+This is the **recommended entry point** for programmatic analysis. It contains every trial's solution program and the full helper library state, structured for easy lookup.
 
-## 3) Data Provenance
+### Loading
 
-- Source raw export: `experiment_data_v2 (1).json`
-- Processing pipeline: `build_reproducible_dataset.py`
-- Core property: symbolic and step-level traces preserve reconstruction-critical information
+```python
+import json
 
-## 4) Core Conventions
+with open("data/programs_and_helpers.json") as f:
+    data = json.load(f)
 
-### Identifiers and granularity
+# Access: data[participant_index][trial_number]
+trial = data["1"]["2"]   # Participant 1, Trial 2
+print(trial["program_symbolic"])
+# → ["W1 = add(H2, H4)", "W2 = add(square, W1)"]
+```
 
-- `participant_uid`: canonical participant ID across files
-- `trial_number`: trial order (`1..14`)
-- `pattern_id`: target pattern index (`1..14`)
+### Record Structure
 
-### Success filtering
+Each `data[pid][trial]` record contains:
 
-- `success` is encoded as `0/1`
-- Some analyses are all-trials, others are success-only
+| Field | Type | Description |
+|---|---|---|
+| `participant_index` | int | Participant ID (1–30) |
+| `trial_number` | int | Trial order (1–14) |
+| `pattern_id` | int | Target pattern index (1–14) |
+| `success` | bool | Whether the participant solved this trial |
+| `program_ops` | list[str] | Ordered list of operation names, e.g. `["reflect_h", "add"]` |
+| `program_symbolic` | list[str] | Symbolic program, e.g. `["W1 = reflect_h(line_h)", "W2 = add(line_h, W1)"]` |
+| `n_steps` | int | Number of steps in the solution |
+| `helpers_used_in_solution` | list[str] | Helper IDs invoked in this solution, e.g. `["H2", "H4"]` |
+| `helpers_used_definitions` | list[obj] | Full definitions of used helpers (see below) |
+| `helpers_created_this_trial` | list[obj] | Helpers saved during this trial |
+| `helper_library_size` | int | Cumulative library size after this trial |
+| `helper_library` | list[obj] | Full cumulative helper library snapshot |
 
-### Symbol conventions (`•`, `Hk`, `Wk`)
+### Helper object fields
 
-- `•` in operation text is a UI placeholder (input slot), not missing data
-- `Hk` = helper symbol (saved pattern in helper library)
-- `Wk` = intermediate symbol (within-trial temporary result)
-- Prefer symbolic fields (for example `symbolic_expr`) over raw `operation_text` for modeling
+Each helper object (in `helpers_used_definitions`, `helpers_created_this_trial`, `helper_library`) has:
 
-## 5) Minimal Data Dictionary
+| Field | Type | Description |
+|---|---|---|
+| `helper_id` | str | Unique ID per participant, e.g. `"H3"` |
+| `macro_str` | str | The helper's recipe — a `;`-separated symbolic program, e.g. `"W1 = reflect_h(line_h) ; W2 = add(line_h, W1)"` |
+| `created_on_trial` | int | *(only in `helpers_used_definitions`)* Which trial this helper was first created |
+
+### Usage Examples
+
+```python
+import json
+
+with open("data/programs_and_helpers.json") as f:
+    data = json.load(f)
+
+# Example 1: Get all programs for one participant
+for tn in sorted(data["5"].keys(), key=int):
+    trial = data["5"][tn]
+    print(f"Trial {tn}: {trial['program_symbolic']}  (lib size: {trial['helper_library_size']})")
+
+# Example 2: Count helper reuse across all participants
+from collections import Counter
+reuse = Counter()
+for pid in data:
+    for tn in data[pid]:
+        for hid in data[pid][tn]["helpers_used_in_solution"]:
+            reuse[(pid, hid)] += 1
+print("Most reused helpers:", reuse.most_common(10))
+
+# Example 3: Compare helper library growth curves
+for pid in ["1", "10", "20"]:
+    sizes = [data[pid][str(t)]["helper_library_size"] for t in range(1, 15)]
+    print(f"P{pid}: {sizes}")
+
+# Example 4: Extract all unique operations used
+all_ops = set()
+for pid in data:
+    for tn in data[pid]:
+        all_ops.update(data[pid][tn]["program_ops"])
+print("Operations:", sorted(all_ops))
+```
+
+---
+
+## 3) `programs_and_helpers.csv` (Flat Version)
+
+A flat CSV with one row per trial (420 rows). Easier for quick inspection in Excel/R but contains less detail than the JSON.
+
+| Column | Description |
+|---|---|
+| `participant_index` | Participant ID |
+| `trial_number` | Trial order (1–14) |
+| `pattern_id` | Target pattern index |
+| `success` | `True`/`False` |
+| `n_steps` | Number of solution steps |
+| `program_ops` | Pipe-separated operation names, e.g. `reflect_h\|add` |
+| `program_symbolic` | Pipe-separated symbolic steps, e.g. `W1 = reflect_h(line_h)\|W2 = add(line_h, W1)` |
+| `helpers_used` | Comma-separated helper IDs used |
+| `helpers_used_expanded` | Comma-separated `Hk:macro_str` with full recipes |
+| `helpers_created_this_trial` | Comma-separated helper IDs created |
+| `helper_library_size` | Cumulative library size |
+
+**Note:** The CSV does not include the cumulative `helper_library` snapshot. Use the JSON for full library tracking.
+
+---
+
+## 4) Key Concepts
+
+### Operations (primitives)
+
+The available operations that construct patterns on a 10×10 binary grid:
+
+- `add` — pixel-wise OR (union)
+- `subtract` — pixel-wise difference
+- `overlap` — pixel-wise AND (intersection)
+- `invert` — flip all cells
+- `reflect_h` — horizontal reflection
+- `reflect_v` — vertical reflection
+
+### Operands
+
+- **Primitives**: built-in base patterns — `line_h`, `line_v`, `diag`, `square`
+- **Helpers** (`Hk`): reusable saved sub-programs from the participant's growing library
+- **Intermediates** (`Wk`): temporary within-trial results (W1, W2, …), numbered per step
+
+### Symbolic Program
+
+Each trial's solution is a sequence of symbolic expressions:
+```
+W1 = reflect_h(line_h)          ← step 1: reflect line_h horizontally → save as W1
+W2 = add(line_h, W1)            ← step 2: union of line_h and W1 → W2
+W3 = add(H4, W2)                ← step 3: uses helper H4 and intermediate W2
+```
+
+### Helpers and `macro_str`
+
+A helper is a saved sub-program. Its `macro_str` is the recipe that generates it:
+```
+"W1 = reflect_h(line_h) ; W2 = add(line_h, W1)"
+```
+- Steps are separated by ` ; `
+- The helper's output is always the **last step's result**
+- Helpers persist across trials (cumulative library)
+- New helpers can reference earlier helpers via `Hk` symbols
+
+---
+
+## 5) Other Data Files
 
 ### `participants.csv`
 
-- `n_trials`, `n_success`
-- `total_steps_success`, `mean_steps_success`
-- `total_time_success_sec`, `mean_time_success_sec`
+One row per participant. Summary statistics:
+- `n_trials`, `n_success` — trial counts
+- `total_steps_success`, `mean_steps_success` — step counts (success trials only)
+- `total_time_success_sec`, `mean_time_success_sec` — timing
 
 ### `trials.csv`
 
+One row per participant × trial (420 rows):
 - Timing: `time_spent_ms`, `time_spent_sec`
-- Sequence: `sequence_ops_*`, `sequence_steps_*`
-- Interaction counts: `helper_add_count`, `helper_use_count`, `preview_count`, `undo_count`, `button_click_count`
-- Target reference: `target_pattern_json`
+- Operation sequence: `sequence_ops_*`, `sequence_steps_*`
+- Interaction counts: `helper_add_count`, `helper_use_count`, `preview_count`, `undo_count`
+- Target reference: `target_pattern_json` (10×10 grid as JSON array)
 
 ### `steps.csv`
 
+One row per construction step (1649 rows):
 - Order: `step_index`, `timestamp`, `interval_from_last`
 - Operation: `op_fn_raw`, `op_canonical`, `operation_text`
-- Operand typing: `operand_*_type` (`primitive/helper/intermediate/none`)
-- Symbolic fields: `output_symbol`, `symbolic_expr`, `symbolic_expr_with_output`
-- Replay field: `pattern_after_json`
+- Operand typing: `operand_*_type` (`primitive` / `helper` / `intermediate` / `none`)
+- Symbolic: `output_symbol`, `symbolic_expr`, `symbolic_expr_with_output`
+- Grid state: `pattern_after_json` (10×10 grid after this step)
 
 ### `helpers_actions.csv`
 
-- `action=add` (helper created), `action=use` (helper used), `action=confirm` (preview confirm logs)
-- Helper fields when available: `helper_id`, `pattern_key`, `pattern_json`, `timestamp`
+Log of all helper interactions:
+- `action=add` — helper created (includes `pattern_json`: the 10×10 grid output)
+- `action=use` — helper invoked in a solution step
+- `action=confirm` — preview confirmation events
+
+### `helper_definitions.csv`
+
+One row per unique helper definition (486 rows):
+- `helper_id`, `macro_str`, `output_symbol`
+- `created_on_trial` — which trial it was first saved
 
 ### `solution_sequences.csv`
 
-- Compact per-trial summary for fast sequence analysis
-- Includes canonical op sequence + symbolic sequence + `solution_signature`
+Compact per-trial summary (420 rows):
+- Canonical op sequence + symbolic sequence + `solution_signature`
 
-## 6) Quick Start (Python)
+### `key_metrics.csv`
 
-Run from inside `dataset_release/`:
+Aggregated metrics by pattern and trial order.
 
-```python
-import pandas as pd
+### `dataset_metadata.json`
 
-trials = pd.read_csv('data/trials.csv')
-steps = pd.read_csv('data/steps.csv')
-helpers = pd.read_csv('data/helpers_actions.csv')
+Build metadata and row counts for verification.
 
-# Success rate by trial number
-print(trials.groupby('trial_number')['success'].mean())
+---
+
+## 6) Visualization Script
+
+**`plot_all_participants_v2.py`** generates one PNG per participant (P01.png … P30.png) showing:
+
+- **Solution row**: Target grid → Step 1 → Step 2 → … → Final grid (10×10 visual grids)
+- **Library row**: Helper library grids at each trial, color-coded:
+  - 🟢 Green border = newly created this trial
+  - 🔴 Red border = used in this trial's solution
+- Symbolic annotations and step counts
+
+**Requirements**: Python 3, matplotlib, numpy
+
+```bash
+# Run from the repo root (data/ must be in place)
+python plot_all_participants_v2.py
+# Output: participant_solutions_v2/P01.png ... P30.png
 ```
 
-## 7) Recommended Analysis Paths
+---
 
-1. Trial-level outcomes and timing: `trials.csv`
-2. Process-level modeling/replay: `steps.csv`
-3. Helper dynamics: `helpers_actions.csv` + `helper_definitions.csv`
-4. Fast sequence mining: `solution_sequences.csv`
+## 7) Data Provenance
 
-## 8) Maintenance and Script Updates
-
-- This release remains a data-focused package.
-- Analysis scripts and figure-generation scripts are maintained and updated continuously in the project workspace.
-- If script or schema changes affect this release format, the README and metadata will be updated accordingly.
+- Source raw export: `experiment_data_v2 (1).json`
+- Processing pipeline: `build_reproducible_dataset.py`
+- Symbolic and step-level traces preserve all reconstruction-critical information
 
