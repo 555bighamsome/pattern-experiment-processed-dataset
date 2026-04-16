@@ -1,8 +1,8 @@
 # Experiment 2 (Pilot) — Processed Dataset
 
-**30 participants × 16 stimuli = 480 trials, 2163 steps, 7561 helper actions.**
+**30 participants × 16 stimuli = 480 trials, 2163 steps.**
 
-Participants construct 10×10 binary grid patterns by composing primitive operations and reusable **helpers** (saved sub-programs). Experiment 2 adds a **preview** mechanic and richer helper interactions compared to Experiment 1.
+Participants construct 10×10 binary grid patterns by composing primitive operations and reusable **helpers** (saved sub-programs).
 
 ---
 

@@ -9,11 +9,10 @@ Participants construct 10×10 binary grid patterns by composing primitive operat
 | Stimuli | 14 | 16 |
 | Trials | 420 | 480 |
 | Steps | 1,649 | 2,163 |
-| Helper definitions / actions | 486 | 7,561 |
 
 See each experiment's README for detailed data documentation:
 - **[Experiment 1](experiment1/README.md)** — 30 × 14 trials, symbolic programs, helper library tracking
-- **[Experiment 2](experiment2/README.md)** — 30 × 16 trials (pilot), interaction logs, preview mechanic
+- **[Experiment 2](experiment2/README.md)** — 30 × 16 trials (pilot), processed behavioral dataset and figures
 
 ---
 
@@ -41,7 +40,7 @@ experiment2/
     participants.csv            ← participant-level summary (30 rows)
     trials.csv                  ← trial-level records with interaction counts (480 rows)
     steps.csv                   ← step-level process log (2163 rows)
-    helpers_actions.csv         ← helper add/remove/click action log (7561 rows)
+    helpers_actions.csv         ← helper interaction log (7561 rows)
     targets.json                ← 16 target patterns (10×10 grids)
     key_metrics.csv             ← by-stimulus success rates and means
     dataset_metadata.json       ← dataset metadata and row counts
