@@ -112,6 +112,15 @@ A flat CSV with one row per trial (420 rows). Easier for quick inspection in Exc
 
 ---
 
+## Key Concepts
+
+- Participants solve each pattern on a 10×10 binary grid using primitives, intermediate workspace objects, and reusable helpers.
+- Core operations include add, subtract, overlap, invert, horizontal reflection, vertical reflection, and diagonal reflection.
+- In the E1 processed step logs, diagonal reflection appears as **reflect_d** canonically, while raw labels may appear as **reflect_diag**.
+- Helpers store reusable symbolic programs and persist across trials as a growing library.
+
+---
+
 ## Other Data Files
 
 ### `participants.csv`

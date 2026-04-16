@@ -49,6 +49,15 @@ experiment2/
 
 ---
 
+## Key Concepts
+
+- Participants build 10×10 binary grid patterns from primitives and reusable helpers.
+- Common operations include add, subtract, overlap, invert, horizontal reflection, vertical reflection, and diagonal reflection.
+- In the processed files, diagonal reflection may appear as **reflect_d** in Experiment 1 and **reflect_diag** in Experiment 2.
+- Helpers are saved sub-programs that can be reused across trials.
+
+---
+
 ## Data Provenance
 
 - **Experiment 1**: Source raw export `experiment_data_v2 (1).json`, processed by `build_reproducible_dataset.py`
