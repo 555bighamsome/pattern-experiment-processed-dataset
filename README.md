@@ -12,7 +12,7 @@ Participants construct 10×10 binary grid patterns by composing primitive operat
 
 See each experiment's README for detailed data documentation:
 - **[Experiment 1](experiment1/README.md)** — 30 × 14 trials, symbolic programs, helper library tracking
-- **[Experiment 2](experiment2/README.md)** — 30 × 16 trials (pilot), processed behavioral dataset and figures
+- **[Experiment 2](experiment2/README.md)** — 30 × 16 trials, processed behavioral dataset and figures
 
 ---
 
@@ -44,7 +44,7 @@ experiment2/
     targets.json                ← 16 target patterns (10×10 grids)
     key_metrics.csv             ← by-stimulus success rates and means
     dataset_metadata.json       ← dataset metadata and row counts
-  e2_pilot_figures.py           ← visualization script (generates all paper panel figures)
+  e2_figures.py                 ← visualization script (generates all paper panel figures)
 ```
 
 ---

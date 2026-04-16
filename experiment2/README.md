@@ -1,4 +1,4 @@
-# Experiment 2 (Pilot) — Processed Dataset
+# Experiment 2 — Processed Dataset
 
 **30 participants × 16 stimuli = 480 trials, 2163 steps.**
 
@@ -142,7 +142,7 @@ with open("data/steps.csv") as f:
 
 ## Visualization
 
-**`e2_pilot_figures.py`** generates publication-ready figures from the processed CSVs:
+**`e2_figures.py`** generates publication-ready figures from the processed CSVs:
 
 | Figure | Description |
 |---|---|
@@ -163,7 +163,7 @@ Oracle helpers (X diagonal, vertical bar, cross, left triangle) and their transf
 - 🟠 Orange = target pattern
 
 ```bash
-python e2_pilot_figures.py
+python e2_figures.py
 # Output: figures/ and figures/paper_panels/
 ```
 

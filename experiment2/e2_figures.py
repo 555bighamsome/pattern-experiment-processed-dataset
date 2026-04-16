@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-E2 Pilot Figures — reads from processed CSVs (no raw JSON needed).
+Experiment 2 Figures — reads from processed CSVs (no raw JSON needed).
 
 Data files expected in ./data/:
   - participants.csv
