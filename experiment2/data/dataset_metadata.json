@@ -1,0 +1,17 @@
+{
+  "experiment": 2,
+  "n_participants": 30,
+  "n_trials": 480,
+  "n_stimuli": 16,
+  "n_steps": 2163,
+  "n_helper_actions": 7561,
+  "filter": "sequence_type=row-wise, derived_success>=8",
+  "files": [
+    "participants.csv",
+    "trials.csv",
+    "steps.csv",
+    "helpers_actions.csv",
+    "targets.json",
+    "key_metrics.csv"
+  ]
+}
