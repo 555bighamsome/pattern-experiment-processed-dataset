@@ -49,26 +49,6 @@ experiment2/
 
 ---
 
-## Key Concepts (shared across experiments)
-
-### Operations (primitives)
-
-Available operations that construct patterns on a 10×10 binary grid:
-
-- `add` — pixel-wise OR (union)
-- `subtract` — pixel-wise difference
-- `overlap` — pixel-wise AND (intersection)
-- `invert` — flip all cells
-- `reflect_h` / `reflect_v` — horizontal / vertical reflection
-
-### Operands
-
-- **Primitives**: built-in base patterns — `line_h`, `line_v`, `diag`, `square`
-- **Helpers** (`Hk`): reusable saved sub-programs from the participant's growing library
-- **Intermediates** (`Wk`): temporary within-trial results (W1, W2, …)
-
----
-
 ## Data Provenance
 
 - **Experiment 1**: Source raw export `experiment_data_v2 (1).json`, processed by `build_reproducible_dataset.py`

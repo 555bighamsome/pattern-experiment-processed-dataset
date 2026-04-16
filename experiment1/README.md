@@ -112,47 +112,6 @@ A flat CSV with one row per trial (420 rows). Easier for quick inspection in Exc
 
 ---
 
-## Key Concepts
-
-### Operations (primitives)
-
-The available operations that construct patterns on a 10×10 binary grid:
-
-- `add` — pixel-wise OR (union)
-- `subtract` — pixel-wise difference
-- `overlap` — pixel-wise AND (intersection)
-- `invert` — flip all cells
-- `reflect_h` — horizontal reflection
-- `reflect_v` — vertical reflection
-
-### Operands
-
-- **Primitives**: built-in base patterns — `line_h`, `line_v`, `diag`, `square`
-- **Helpers** (`Hk`): reusable saved sub-programs from the participant's growing library
-- **Intermediates** (`Wk`): temporary within-trial results (W1, W2, …), numbered per step
-
-### Symbolic Program
-
-Each trial's solution is a sequence of symbolic expressions:
-```
-W1 = reflect_h(line_h)          ← step 1: reflect line_h horizontally → save as W1
-W2 = add(line_h, W1)            ← step 2: union of line_h and W1 → W2
-W3 = add(H4, W2)                ← step 3: uses helper H4 and intermediate W2
-```
-
-### Helpers and `macro_str`
-
-A helper is a saved sub-program. Its `macro_str` is the recipe that generates it:
-```
-"W1 = reflect_h(line_h) ; W2 = add(line_h, W1)"
-```
-- Steps are separated by ` ; `
-- The helper's output is always the **last step's result**
-- Helpers persist across trials (cumulative library)
-- New helpers can reference earlier helpers via `Hk` symbols
-
----
-
 ## Other Data Files
 
 ### `participants.csv`
